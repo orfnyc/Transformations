@@ -19,7 +19,7 @@
                 ])
                 canvas = document.getElementById("canvas");
                 context = canvas.getContext("2d");
-                context.lineWidth = 2.5;
+                context.lineWidth = 1;
                 scale = 25;
                 frameOriginX = 250;
                 frameOriginY = 250;
@@ -93,15 +93,16 @@
                 // TO DO = Resolve slope if line is vertical
                 let slope1 = (start1.elements[1] - end1.elements[1]) / (start1.elements[0] - end1.elements[0]);
                 let slope2 = (start2.elements[1] - end2.elements[1]) / (start2.elements[0] - end2.elements[0]);
-                let y1 = start1.elements[1] - slope1*start1.elements[0];
-                let y2 = start2.elements[1] - slope2*start2.elements[0];
-                if (slope1 == slope2) return (y1 == y2) ? "colinear" : "parallel";
+                let b1 = start1.elements[1] - slope1*start1.elements[0];
+                let b2 = start2.elements[1] - slope2*start2.elements[0];
+                if (slope1 == slope2) return (b1 == b2) ? "colinear" : "parallel";
                 // If they are not, they intersect:
                 // Find the point of intersection 
+                
                 // If that point is on both segments the segments intersect
                 return "not parallel";
             }
-            
+
             function test(axis)
             {
                 for (let i = 0; i < objects.length; i++)
@@ -109,6 +110,8 @@
                     objects[i].rotate(10, axis);
                 }
                 drawScene();
+                drawEdge(new Edge(new Vector([-1, 0, 0]), new Vector([1, 0, 0])));
+                drawPoint(new Vector([0, 0]), "#FFFFFF");
             }
         </script>
     </head>
