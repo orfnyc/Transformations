@@ -91,6 +91,11 @@ class Vector
         }
         console.log(str);
     }
+
+    copy()
+    {
+        return new Vector([this.elements[0], this.elements[1], this.elements[2]]);
+    }
 }
 
 class Matrix
@@ -198,5 +203,52 @@ class Cube extends Object
         this.edges.push(new Edge(new Vector([size, size, size]), new Vector([size, size, -size])));
         this.edges.push(new Edge(new Vector([-size, size, size]), new Vector([-size, size, -size])));
         this.edges.push(new Edge(new Vector([-size, -size, size]), new Vector([-size, -size, -size])));
+    }
+}
+
+class Dodecahedron extends Object
+{
+    constructor()
+    {
+        super([]);
+        let gR = (1 + Math.sqrt(5)) / 2;
+        // Vertices
+        let vertices = [new Vector([gR, gR, gR]), new Vector([gR, gR, -gR]), new Vector([gR, -gR, gR]),
+                        new Vector([gR, -gR, -gR]), new Vector([-gR, gR, gR]), new Vector([-gR, gR, -gR]),
+                        new Vector([-gR, -gR, gR]), new Vector([-gR, -gR, -gR]), new Vector([0, Math.pow(gR, 2), 1]),
+                        new Vector([0, Math.pow(gR, 2), -1]), new Vector([0, -Math.pow(gR, 2), 1]), new Vector([0, -Math.pow(gR, 2), -1]),
+                        new Vector([Math.pow(gR, 2), 1, 0]), new Vector([Math.pow(gR, 2), -1, 0]), new Vector([-Math.pow(gR, 2), 1, 0]),
+                        new Vector([-Math.pow(gR, 2), -1, 0]), new Vector([1, 0, Math.pow(gR, 2)]), new Vector([1, 0, -Math.pow(gR, 2)]),
+                        new Vector([-1, 0, Math.pow(gR, 2)]), new Vector([-1, 0, -Math.pow(gR, 2)])];
+        this.edges.push(new Edge(vertices[0].copy(), vertices[8].copy()));
+        this.edges.push(new Edge(vertices[0].copy(), vertices[12].copy()));
+        this.edges.push(new Edge(vertices[0].copy(), vertices[16].copy()));
+        this.edges.push(new Edge(vertices[1].copy(), vertices[12].copy()));
+        this.edges.push(new Edge(vertices[1].copy(), vertices[9].copy()));
+        this.edges.push(new Edge(vertices[1].copy(), vertices[17].copy()));
+        this.edges.push(new Edge(vertices[8].copy(), vertices[4].copy()));
+        this.edges.push(new Edge(vertices[8].copy(), vertices[9].copy()));
+        this.edges.push(new Edge(vertices[16].copy(), vertices[18].copy()));
+        this.edges.push(new Edge(vertices[16].copy(), vertices[2].copy()));
+        this.edges.push(new Edge(vertices[18].copy(), vertices[4].copy()));
+        this.edges.push(new Edge(vertices[18].copy(), vertices[6].copy()));
+        this.edges.push(new Edge(vertices[10].copy(), vertices[2].copy()));
+        this.edges.push(new Edge(vertices[10].copy(), vertices[6].copy()));
+        this.edges.push(new Edge(vertices[10].copy(), vertices[11].copy()));
+        this.edges.push(new Edge(vertices[6].copy(), vertices[15].copy()));
+        this.edges.push(new Edge(vertices[7].copy(), vertices[15].copy()));
+        this.edges.push(new Edge(vertices[7].copy(), vertices[11].copy()));
+        this.edges.push(new Edge(vertices[15].copy(), vertices[14].copy()));
+        this.edges.push(new Edge(vertices[14].copy(), vertices[4].copy()));
+        this.edges.push(new Edge(vertices[14].copy(), vertices[5].copy()));
+        this.edges.push(new Edge(vertices[5].copy(), vertices[9].copy()));
+        this.edges.push(new Edge(vertices[5].copy(), vertices[19].copy()));
+        this.edges.push(new Edge(vertices[7].copy(), vertices[19].copy()));
+        this.edges.push(new Edge(vertices[11].copy(), vertices[3].copy()));
+        this.edges.push(new Edge(vertices[3].copy(), vertices[13].copy()));
+        this.edges.push(new Edge(vertices[12].copy(), vertices[13].copy()));
+        this.edges.push(new Edge(vertices[13].copy(), vertices[2].copy()));
+        this.edges.push(new Edge(vertices[3].copy(), vertices[17].copy()));
+        this.edges.push(new Edge(vertices[19].copy(), vertices[17].copy()));
     }
 }

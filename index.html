@@ -10,6 +10,7 @@
         <script src="mathComponents.js" async></script>
         <script>
             let projectionMatrix, canvas, vectors, context, scale, originX, originY, objects, o2;
+            let rotation, tester;
             function initialize()
             {
                 projectionMatrix = new Matrix([
@@ -19,14 +20,14 @@
                 ])
                 canvas = document.getElementById("canvas");
                 context = canvas.getContext("2d");
-                context.lineWidth = 1;
-                scale = 25;
-                frameOriginX = 250;
-                frameOriginY = 250;
+                context.lineWidth = 2;
+                rotation = false;
+                scale = 32;
+                frameOriginX = 256;
+                frameOriginY = 256;
                 objects = [];
-                origin = new Vector([0, 0, -1])
-                objects.push(new Cube(2));
-                objects.push(new Cube(1));
+                origin = new Vector([0, 0, -16])
+                objects.push(new Dodecahedron());
                 drawScene();
             }
 
@@ -52,71 +53,146 @@
                                                         frameOriginY - start.elements[1]*scale, 
                                                         frameOriginX + end.elements[0]*scale, 
                                                         frameOriginY - end.elements[1]*scale);
-                // TO DO: Set colors based on coordinates in RGB space
-                grd.addColorStop(0, "red");
-                grd.addColorStop(1, "white");
-                context.strokeStyle = edge.color;
+                let r = 128 - edge.start.elements[0]*16;
+                let g = 128 - edge.start.elements[1]*16;
+                let b = 128 + edge.start.elements[2]*16;
+                console.log(r);
+                grd.addColorStop(0, `rgb(${r}, ${g}, ${b})`);
+                r = 128 - edge.end.elements[0]*16;
+                g = 128 - edge.end.elements[1]*16;
+                b = 128 + edge.end.elements[2]*16;
+                grd.addColorStop(1, `rgb(${r}, ${g}, ${b})`);
+                context.strokeStyle = grd;
                 context.stroke();
             }
 
-            function drawObject(object)
+            // Possible Orientations
+            // 0: Segments have no intersection (parallel or otherwise)
+            // 1: Segments have 1 intersection, edge 1 is in front
+            // 2: Segments have 1 intersection, edge 2 is in front
+            // 3: Edges have >1 insection due to colinearity
+            function orientation(edge1, edge2)
             {
-                for (let i = 0; i < object.edges.length; i++)
+                // Important information about line each edge is a segment of
+                // TO DO: Special case for vertical line
+                let m1 = (edge1.start.elements[1] - edge1.end.elements[1]) / (edge1.start.elements[0] - edge1.end.elements[0]);
+                let m2 = (edge2.start.elements[1] - edge2.end.elements[1]) / (edge2.start.elements[0] - edge2.end.elements[0]);
+                console.log("Slopes: " + m1 + " " + m2);
+                // y = mx + b --> b = y - mx
+                let b1 = edge1.start.elements[1] - m1 * edge1.start.elements[0];
+                let b2 = edge2.start.elements[1] - m2 * edge2.start.elements[0];
+                console.log("b: " + b1 + " " + b2);
+                // Same slope can be parallel or colinear projections
+                if (m1 == m2)
                 {
-                    drawEdge(object.edges[i]);
+                    if (b1 == b2)
+                    {
+                        // colinear
+                        if (inRange(edge1.start.elements[0], edge2.start.elements[0], edge2.end.elements[0]) ||
+                            inRange(edge1.end.elements[0], edge2.start.elements[0], edge2.end.elements[0]))
+                        {
+                            return 3;
+                        }
+                        return 0;
+                    }
+                    else
+                    {
+                        // parallel
+                        return 0;
+                    }
                 }
+                // Find point of intersection of lines
+                // y = m1 * x + b1 --> y - m1 * x = b1
+                // y = m2 * x + b1 --> y - m2 * x = b2
+                let y = ((b2*m1) - (m2*b1)) / (m1 - m2);
+                let x = (-b1+y) / m1;
+                console.log("Intersection: (" + x + ", " + y + ")");
+                // Check if (x, y) is on both segments
+                if (!(inRange(x, edge1.start.elements[0], edge1.end.elements[0]) &&
+                    inRange(x, edge2.start.elements[0], edge2.end.elements[0]) &&
+                    inRange(y, edge1.start.elements[1], edge1.end.elements[1]) &&
+                    inRange(y, edge2.start.elements[1], edge2.end.elements[1])))
+                // if not: return 0
+                {
+                    return 0;
+                }
+                // if: find and compare the z-coordinates
+                let z1; let z2;
+                // let slope = change in z / change in x
+                slope1 = (edge1.start.elements[2] - edge1.end.elements[2]) / (edge1.start.elements[0] - edge1.end.elements[0]);
+                slope2 = (edge2.start.elements[2] - edge2.end.elements[2]) / (edge2.start.elements[0] - edge2.end.elements[0]);
+                // equation for a line Z - Zn = slope(M - Mn) --> Z = slope(M - Mn) + Zn
+                z1 = slope1 * (x - edge1.start.elements[0]) + edge1.start.elements[2];
+                z2 = slope2 * (x - edge2.start.elements[0]) + edge2.start.elements[2];
+                if (z1 <= z2) return 1;
+                return 2;
             }
 
             function drawScene()
             {
+                // Clear canvas
                 context.clearRect(0, 0, canvas.width, canvas.height);
+                // Add all edges in scene to queue
+                let queue = [];
                 for (let i = 0; i < objects.length; i++)
                 {
-                    drawObject(objects[i]);
+                    for (let j = 0; j < objects[i].edges.length; j++)
+                    {
+                        queue.push(objects[i].edges[j]);
+                    }
                 }
-            }
+                // Place elements in queue into drawing order
+                // toDraw ordered by furthest to closest
+                let toDraw = [];
+                while (queue.length > 0)
+                {
+                    let edge = queue.shift()
+                    // start with the first
+                    let index = 0;
+                    // increase position while edge is not behind edge at position
+                    while (index < toDraw.length && orientation(edge, toDraw[index]) != 2)
+                    {
+                        index++;
+                    } 
+                    toDraw.splice(index, 0, edge);
+                }
+                for (let i = 0 ; i < toDraw.length; i++)
+                {
+                    drawEdge(toDraw[i]);
+                }
+            } 
 
-            function resolveDepth()
+            function inRange(x, bound1, bound2)
             {
-                
-            }
-
-            // returns vector of intersection point in R3
-            function findIntersection(edge1, edge2)
-            {
-                let start1 = edge1.start.transform(projectionMatrix);
-                let start2 = edge2.start.transform(projectionMatrix);
-                let end1 = edge1.end.transform(projectionMatrix);
-                let end2 = edge2.end.transform(projectionMatrix);
-                // the xy-projection of each edge can be extended into a line
-                // Check if those lines intersect (slope not the same)
-                // TO DO = Resolve slope if line is vertical
-                let slope1 = (start1.elements[1] - end1.elements[1]) / (start1.elements[0] - end1.elements[0]);
-                let slope2 = (start2.elements[1] - end2.elements[1]) / (start2.elements[0] - end2.elements[0]);
-                let b1 = start1.elements[1] - slope1*start1.elements[0];
-                let b2 = start2.elements[1] - slope2*start2.elements[0];
-                if (slope1 == slope2) return (b1 == b2) ? "colinear" : "parallel";
-                // If they are not, they intersect:
-                // Find the point of intersection 
-                
-                // If that point is on both segments the segments intersect
-                return "not parallel";
+                let min = Math.min(bound1, bound2);
+                let max = Math.max(bound1, bound2);
+                return (min <= x && x <= max)
             }
 
             function test(axis)
             {
-                for (let i = 0; i < objects.length; i++)
+                rotation = !rotation;
+                if (rotation)
                 {
-                    objects[i].rotate(10, axis);
+                    tester = setInterval(
+                        function(){
+                            for (let i = 0; i < objects.length; i++)
+                            {
+                                objects[i].rotate(1, axis);
+                            }
+                            drawScene();
+                        },40);
                 }
-                drawScene();
-                drawEdge(new Edge(new Vector([-1, 0, 0]), new Vector([1, 0, 0])));
-                drawPoint(new Vector([0, 0]), "#FFFFFF");
+                else
+                {
+                    clearInterval(tester);
+                }
             }
+
         </script>
     </head>
     <body onload="initialize();">
-        <canvas id="canvas" width="500" height="500"></canvas>
+        <canvas id="canvas" width="512" height="512"></canvas>
         <button onclick="test(2);">Rotate x-axis</button>
         <button onclick="test(1);">Rotate y-axis</button>
         <button onclick="test(0);">Rotate z-axis</button>
