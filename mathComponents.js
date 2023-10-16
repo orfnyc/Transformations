@@ -78,7 +78,6 @@ class Vector
                     new Vector([0, 0, 1])
                 ]);
         }
-        console.log(m);
         this.elements = this.transform(m).elements;
     }
 
@@ -179,7 +178,6 @@ class Object
         for (let i = 0; i < this.edges.length; i++)
         {
             this.edges[i].rotate(degrees, axis);
-            console.log(axis);
         }
     }
 }

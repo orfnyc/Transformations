@@ -56,7 +56,6 @@
                 let r = 128 - edge.start.elements[0]*16;
                 let g = 128 - edge.start.elements[1]*16;
                 let b = 128 + edge.start.elements[2]*16;
-                console.log(r);
                 grd.addColorStop(0, `rgb(${r}, ${g}, ${b})`);
                 r = 128 - edge.end.elements[0]*16;
                 g = 128 - edge.end.elements[1]*16;
@@ -70,19 +69,17 @@
             // 0: Segments have no intersection (parallel or otherwise)
             // 1: Segments have 1 intersection, edge 1 is in front
             // 2: Segments have 1 intersection, edge 2 is in front
-            // 3: Edges have >1 insection due to colinearity
+            // 3: Segments have >1 insection
             function orientation(edge1, edge2)
             {
                 // Important information about line each edge is a segment of
                 // TO DO: Special case for vertical line
                 let m1 = (edge1.start.elements[1] - edge1.end.elements[1]) / (edge1.start.elements[0] - edge1.end.elements[0]);
                 let m2 = (edge2.start.elements[1] - edge2.end.elements[1]) / (edge2.start.elements[0] - edge2.end.elements[0]);
-                console.log("Slopes: " + m1 + " " + m2);
                 // y = mx + b --> b = y - mx
                 let b1 = edge1.start.elements[1] - m1 * edge1.start.elements[0];
                 let b2 = edge2.start.elements[1] - m2 * edge2.start.elements[0];
-                console.log("b: " + b1 + " " + b2);
-                // Same slope can be parallel or colinear projections
+                // Same slope
                 if (m1 == m2)
                 {
                     if (b1 == b2)
@@ -91,6 +88,14 @@
                         if (inRange(edge1.start.elements[0], edge2.start.elements[0], edge2.end.elements[0]) ||
                             inRange(edge1.end.elements[0], edge2.start.elements[0], edge2.end.elements[0]))
                         {
+                            if (edge1.start.elements[2] > edge2.start.elements[2])
+                            {
+                                return 2;
+                            }
+                            else if (edge1.start.elements[2] < edge2.start.elements[2])
+                            {
+                                return 1;
+                            }
                             return 3;
                         }
                         return 0;
@@ -106,7 +111,6 @@
                 // y = m2 * x + b1 --> y - m2 * x = b2
                 let y = ((b2*m1) - (m2*b1)) / (m1 - m2);
                 let x = (-b1+y) / m1;
-                console.log("Intersection: (" + x + ", " + y + ")");
                 // Check if (x, y) is on both segments
                 if (!(inRange(x, edge1.start.elements[0], edge1.end.elements[0]) &&
                     inRange(x, edge2.start.elements[0], edge2.end.elements[0]) &&
@@ -169,6 +173,18 @@
                 return (min <= x && x <= max)
             }
 
+            function transformScene(matrix)
+            {
+                for (let i = 0; i < objects.length; i++)
+                {
+                    for (let j = 0; j < objects[i].edges.length; j++)
+                    {
+                        edges.start.transform(matrix);
+                        edges.end.transform(matrix);
+                    }
+                }
+            }
+
             function test(axis)
             {
                 rotation = !rotation;
@@ -189,6 +205,15 @@
                 }
             }
 
+            function test2()
+            {
+                for (let i = 0; i < objects.length; i++)
+                {
+                    objects[i].rotate(9, 1);
+                }
+                drawScene();
+            }
+
         </script>
     </head>
     <body onload="initialize();">
@@ -196,5 +221,23 @@
         <button onclick="test(2);">Rotate x-axis</button>
         <button onclick="test(1);">Rotate y-axis</button>
         <button onclick="test(0);">Rotate z-axis</button>
+
+        <form> 
+            <div>
+                <input type="number">
+                <input type="number">
+                <input type="number">
+            </div>
+            <div>
+                <input type="number">
+                <input type="number">
+                <input type="number">
+            </div>
+            <div>
+                <input type="number">
+                <input type="number">
+                <input type="number">
+            </div>
+        </form>
     </body>
 </html>
