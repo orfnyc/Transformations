@@ -9,8 +9,7 @@
         </style>
         <script src="mathComponents.js" async></script>
         <script>
-            let projectionMatrix, canvas, vectors, context, scale, originX, originY, objects, o2;
-            let rotation, tester;
+            let projectionMatrix, canvas, vectors, context, scale, originX, originY, objects, o2, rotation;
             function initialize()
             {
                 projectionMatrix = new Matrix([
@@ -19,13 +18,65 @@
                     new Vector([0, 0])
                 ])
                 canvas = document.getElementById("canvas");
+                document.addEventListener('keydown', () =>  
+                {
+                    let code = event.code;
+                    if (code === "KeyA")
+                    {
+                        for (let i = 0; i < objects.length; i++)
+                        {
+                            objects[i].rotate(-1, 1);
+                        }
+                        drawScene();
+                    }
+                    else if (code === "KeyD")
+                    {
+                        for (let i = 0; i < objects.length; i++)
+                        {
+                            objects[i].rotate(1, 1);
+                        }
+                        drawScene();
+                    }
+                    if (code === "KeyW")
+                    {
+                        for (let i = 0; i < objects.length; i++)
+                        {
+                            objects[i].rotate(1, 2);
+                        }
+                        drawScene();
+                    }
+                    else if (code === "KeyS")
+                    {
+                        for (let i = 0; i < objects.length; i++)
+                        {
+                            objects[i].rotate(-1, 2);
+                        }
+                        drawScene();
+                    }
+                    if (code === "KeyQ")
+                    {
+                        for (let i = 0; i < objects.length; i++)
+                        {
+                            objects[i].rotate(1, 0);
+                        }
+                        drawScene();
+                    }
+                    else if (code === "KeyE")
+                    {
+                        for (let i = 0; i < objects.length; i++)
+                        {
+                            objects[i].rotate(-1, 0);
+                        }
+                        drawScene();
+                    }
+                }, false);
                 context = canvas.getContext("2d");
                 context.lineWidth = 2;
-                rotation = false;
                 scale = 32;
                 frameOriginX = 256;
                 frameOriginY = 256;
                 objects = [];
+                rotation = new Vector([0, 0, 0]);
                 origin = new Vector([0, 0, -16])
                 objects.push(new Dodecahedron());
                 drawScene();
@@ -53,6 +104,8 @@
                                                         frameOriginY - start.elements[1]*scale, 
                                                         frameOriginX + end.elements[0]*scale, 
                                                         frameOriginY - end.elements[1]*scale);
+                // 255, 180, 75
+                // 50, 0, 80
                 let r = 128 - edge.start.elements[0]*16;
                 let g = 128 - edge.start.elements[1]*16;
                 let b = 128 + edge.start.elements[2]*16;
@@ -142,9 +195,14 @@
                 {
                     for (let j = 0; j < objects[i].edges.length; j++)
                     {
-                        queue.push(objects[i].edges[j]);
+                        let edge = objects[i].edges[j].copy();
+                        edge.rotate(rotation.elements[0], 0);
+                        edge.rotate(rotation.elements[1], 1);
+                        edge.rotate(rotation.elements[2], 2);
+                        queue.push(edge);
                     }
                 }
+                console.log(queue);
                 // Place elements in queue into drawing order
                 // toDraw ordered by furthest to closest
                 let toDraw = [];
@@ -187,22 +245,7 @@
 
             function test(axis)
             {
-                rotation = !rotation;
-                if (rotation)
-                {
-                    tester = setInterval(
-                        function(){
-                            for (let i = 0; i < objects.length; i++)
-                            {
-                                objects[i].rotate(1, axis);
-                            }
-                            drawScene();
-                        },40);
-                }
-                else
-                {
-                    clearInterval(tester);
-                }
+                
             }
 
             function test2()

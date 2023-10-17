@@ -163,6 +163,11 @@ class Edge
         this.start.rotate(degrees, axis);
         this.end.rotate(degrees, axis);
     }
+
+    copy()
+    {
+        return new Edge(this.start.copy(), this.end.copy());
+    }
 }
 
 class Object
