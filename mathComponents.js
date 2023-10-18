@@ -192,6 +192,7 @@ class Cube extends Object
     constructor(size)
     {
         super([]);
+        size /= 2;
         this.edges.push(new Edge(new Vector([size, -size, size]), new Vector([size, size, size])));
         this.edges.push(new Edge(new Vector([size, size, size]), new Vector([-size, size, size])));
         this.edges.push(new Edge(new Vector([-size, size, size]), new Vector([-size, -size, size])));

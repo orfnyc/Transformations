@@ -10,7 +10,7 @@
         <script src="mathComponents.js" async></script>
         <script>
             let projectionMatrix, canvas, vectors, context, scale, originX, originY, objects, o2, rotation;
-            let userInputTest, transformationForm;
+            let userInputTest, transformationForm, matrixForm;
             function initialize()
             {
                 projectionMatrix = new Matrix([
@@ -24,9 +24,11 @@
                 transformationForm.addEventListener("submit", (e) => 
                 {
                     e.preventDefault();
-                    console.log("here");
-                    let n = parseFloat(userInputTest.value);
-                    transformScene(new Matrix([new Vector([n, 0, 0]), new Vector([0, n, 0]), new Vector([0, 0, n])]));
+                    console.log(matrixForm);
+                    let v1 = new Vector([matrixForm[0].value, matrixForm[3].value, matrixForm[6].value]);
+                    let v2 = new Vector([matrixForm[1].value, matrixForm[4].value, matrixForm[7].value]);
+                    let v3 = new Vector([matrixForm[2].value, matrixForm[5].value, matrixForm[8].value]);
+                    transformScene(new Matrix([v1, v2, v3]));
                     drawScene();
                 });
                 document.addEventListener('keydown', () =>  
@@ -64,35 +66,37 @@
                         }
                         drawScene();
                     }
-                    if (code === "KeyQ")
-                    {
-                        for (let i = 0; i < objects.length; i++)
-                        {
-                            objects[i].rotate(1, 0);
-                        }
-                        drawScene();
-                    }
-                    else if (code === "KeyE")
-                    {
-                        for (let i = 0; i < objects.length; i++)
-                        {
-                            objects[i].rotate(-1, 0);
-                        }
-                        drawScene();
-                    }
                 }, false);
                 context = canvas.getContext("2d");
-                context.lineWidth = 1;
+                context.lineWidth = 2;
                 scale = 32;
                 frameOriginX = 256;
                 frameOriginY = 256;
                 objects = [];
                 rotation = new Vector([0, 0, 0]);
                 origin = new Vector([0, 0, -16])
-                objects.push(new Dodecahedron());
+                objects.push(new Cube(3));
+                buildMatrixForm();
                 drawScene();
             }
 
+            function buildMatrixForm()
+            {
+                matrixForm = [];
+                for (let i = 0; i < 3; i++)
+                {
+                    for (let j = 0; j < 3; j++)
+                    {
+                        let el = document.createElement("input");
+                        el.setAttribute("step", "0.01");
+                        el.setAttribute("type", "number");
+                        transformationForm.appendChild(el);
+                        matrixForm.push(el);
+                    }
+                    transformationForm.appendChild(document.createElement("br"));
+                }
+                console.log(matrixForm);
+            }
             function drawVector(vector)
             {
                 let v = vector.transform(projectionMatrix);
@@ -116,13 +120,13 @@
                                                         frameOriginY - end.elements[1]*scale);
                 // 255, 200, 75
                 // 50, 0, 80
-                let r = (255+50) / 2 + edge.start.elements[2] * (-255+50)/8
-                let g = (200+0) / 2 + edge.start.elements[2] * (-200+0)/8
-                let b = (75+80) / 2 + edge.start.elements[2] * (-75+80)/8
+                let r = (255+50) / 2 + edge.start.elements[2] * (-255+50)/12
+                let g = (200+0) / 2 + edge.start.elements[2] * (-200+0)/12
+                let b = (75+80) / 2 + edge.start.elements[2] * (-75+80)/12
                 grd.addColorStop(0, `rgb(${r}, ${g}, ${b})`);
-                r = (255+50) / 2 + edge.end.elements[2] * (-255+50)/8
-                g = (200+0) / 2 + edge.end.elements[2] * (-200+0)/8
-                b = (75+80) / 2 + edge.end.elements[2] * (-75+80)/8
+                r = (255+50) / 2 + edge.end.elements[2] * (-255+50)/12
+                g = (200+0) / 2 + edge.end.elements[2] * (-200+0)/12
+                b = (75+80) / 2 + edge.end.elements[2] * (-75+80)/12
                 grd.addColorStop(1, `rgb(${r}, ${g}, ${b})`);
                 context.strokeStyle = grd;
                 context.stroke();
@@ -271,13 +275,10 @@
     </head>
     <body onload="initialize();">
         <canvas id="canvas" width="512" height="512"></canvas>
-        <button onclick="test(2);">Rotate x-axis</button>
-        <button onclick="test(1);">Rotate y-axis</button>
-        <button onclick="test(0);">Rotate z-axis</button>
-
         <form id="transformationForm">
-            <input step="0.1" type="number" id="tester">
-            <button type="submit">Submit</button>
+            <button type="submit">Submit</button> <br>
         </form>
+        <button onclick="objects=[new Cube(3)]; drawScene();">Reset Cube</button>
+        <button onclick="objects=[new Dodecahedron()]; drawScene();">Reset Dodecahedron</button>
     </body>
 </html>
