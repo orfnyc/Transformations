@@ -10,6 +10,7 @@
         <script src="mathComponents.js" async></script>
         <script>
             let projectionMatrix, canvas, vectors, context, scale, originX, originY, objects, o2, rotation;
+            let userInputTest, transformationForm;
             function initialize()
             {
                 projectionMatrix = new Matrix([
@@ -18,6 +19,16 @@
                     new Vector([0, 0])
                 ])
                 canvas = document.getElementById("canvas");
+                userInputTest = document.getElementById("tester");
+                transformationForm = document.getElementById("transformationForm");
+                transformationForm.addEventListener("submit", (e) => 
+                {
+                    e.preventDefault();
+                    console.log("here");
+                    let n = parseFloat(userInputTest.value);
+                    transformScene(new Matrix([new Vector([n, 0, 0]), new Vector([0, n, 0]), new Vector([0, 0, n])]));
+                    drawScene();
+                });
                 document.addEventListener('keydown', () =>  
                 {
                     let code = event.code;
@@ -71,7 +82,7 @@
                     }
                 }, false);
                 context = canvas.getContext("2d");
-                context.lineWidth = 2;
+                context.lineWidth = 1;
                 scale = 32;
                 frameOriginX = 256;
                 frameOriginY = 256;
@@ -99,20 +110,19 @@
                 context.beginPath();
                 context.moveTo(frameOriginX + start.elements[0]*scale, frameOriginY - start.elements[1]*scale);
                 context.lineTo(frameOriginX + end.elements[0]*scale, frameOriginY - end.elements[1]*scale);
-
                 let grd = context.createLinearGradient(frameOriginX + start.elements[0]*scale, 
                                                         frameOriginY - start.elements[1]*scale, 
                                                         frameOriginX + end.elements[0]*scale, 
                                                         frameOriginY - end.elements[1]*scale);
-                // 255, 180, 75
+                // 255, 200, 75
                 // 50, 0, 80
-                let r = 128 - edge.start.elements[0]*16;
-                let g = 128 - edge.start.elements[1]*16;
-                let b = 128 + edge.start.elements[2]*16;
+                let r = (255+50) / 2 + edge.start.elements[2] * (-255+50)/8
+                let g = (200+0) / 2 + edge.start.elements[2] * (-200+0)/8
+                let b = (75+80) / 2 + edge.start.elements[2] * (-75+80)/8
                 grd.addColorStop(0, `rgb(${r}, ${g}, ${b})`);
-                r = 128 - edge.end.elements[0]*16;
-                g = 128 - edge.end.elements[1]*16;
-                b = 128 + edge.end.elements[2]*16;
+                r = (255+50) / 2 + edge.end.elements[2] * (-255+50)/8
+                g = (200+0) / 2 + edge.end.elements[2] * (-200+0)/8
+                b = (75+80) / 2 + edge.end.elements[2] * (-75+80)/8
                 grd.addColorStop(1, `rgb(${r}, ${g}, ${b})`);
                 context.strokeStyle = grd;
                 context.stroke();
@@ -237,8 +247,8 @@
                 {
                     for (let j = 0; j < objects[i].edges.length; j++)
                     {
-                        edges.start.transform(matrix);
-                        edges.end.transform(matrix);
+                        objects[i].edges[j].start = objects[i].edges[j].start.transform(matrix);
+                        objects[i].edges[j].end = objects[i].edges[j].end.transform(matrix);
                     }
                 }
             }
@@ -265,22 +275,9 @@
         <button onclick="test(1);">Rotate y-axis</button>
         <button onclick="test(0);">Rotate z-axis</button>
 
-        <form> 
-            <div>
-                <input type="number">
-                <input type="number">
-                <input type="number">
-            </div>
-            <div>
-                <input type="number">
-                <input type="number">
-                <input type="number">
-            </div>
-            <div>
-                <input type="number">
-                <input type="number">
-                <input type="number">
-            </div>
+        <form id="transformationForm">
+            <input step="0.1" type="number" id="tester">
+            <button type="submit">Submit</button>
         </form>
     </body>
 </html>
