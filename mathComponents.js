@@ -30,7 +30,7 @@ class Vector
     
     transform(matrix)
     {
-        if (this.elements.length != matrix.vectors.length) { return null; }
+        if (this.elements.length != matrix.vectors.length) { console.log("size error"); return null; }
         let res = [];
         for (let i = 0; i < matrix.vectors[0].elements.length; i++)
         {
@@ -84,7 +84,7 @@ class Vector
     print()
     {
         let str = "";
-        for (let e = 0; e < this.elements.length; r++)
+        for (let e = 0; e < this.elements.length; e++)
         {
             str += this.elements[e] + "\n";
         }
@@ -120,6 +120,8 @@ class Matrix
         return new Matrix(result);
     }
 
+    // THIS * OTHER
+    // returns new matrix, does not mutate this
     multiply(other)
     {
         if (this.vectors.length != other.vectors[0].elements.length) { return null; }
@@ -164,13 +166,20 @@ class Edge
         this.end.rotate(degrees, axis);
     }
 
+    transform(matrix)
+    {
+        let s = this.start.transform(matrix);
+        let e = this.end.transform(matrix);
+        return new Edge(s, e);
+    }
+
     copy()
     {
         return new Edge(this.start.copy(), this.end.copy());
     }
 }
 
-class Object
+class StillObject
 {
     edges;
     constructor(edges)
@@ -185,9 +194,29 @@ class Object
             this.edges[i].rotate(degrees, axis);
         }
     }
+
+    transform(matrix)
+    {
+        let res = []
+        for (let e = 0; e < this.edges.length; e++)
+        {
+            res.push(this.edges[e].transform(matrix));
+        }
+        return new StillObject(res);
+    }
+
+    copy()
+    {
+        let res = []
+        for (let e = 0; e < this.edges.length; e++)
+        {
+            res.push(this.edges[e].copy());
+        }
+        return new StillObject(res);
+    }
 }
 
-class Cube extends Object
+class Cube extends StillObject
 {
     constructor(size)
     {
@@ -210,13 +239,12 @@ class Cube extends Object
     }
 }
 
-class Dodecahedron extends Object
+class Dodecahedron extends StillObject
 {
     constructor()
     {
         super([]);
         let gR = (1 + Math.sqrt(5)) / 2;
-        // Vertices
         let vertices = [new Vector([gR, gR, gR]), new Vector([gR, gR, -gR]), new Vector([gR, -gR, gR]),
                         new Vector([gR, -gR, -gR]), new Vector([-gR, gR, gR]), new Vector([-gR, gR, -gR]),
                         new Vector([-gR, -gR, gR]), new Vector([-gR, -gR, -gR]), new Vector([0, Math.pow(gR, 2), 1]),
@@ -255,4 +283,71 @@ class Dodecahedron extends Object
         this.edges.push(new Edge(vertices[3].copy(), vertices[17].copy()));
         this.edges.push(new Edge(vertices[19].copy(), vertices[17].copy()));
     }
+}
+
+class Icosahedron extends StillObject
+{
+    constructor()
+    {
+        super([]);
+        let gR = (1 + Math.sqrt(5)) / 2;
+        let vertices = [new Vector([0, 1, gr]), new Vector([0, 1, -gr]), new Vector([0, -1, gr]), new Vector([0, -1, -gr]),
+                        new Vector([1]), new Vector([]), new Vector([]), new Vector([]),
+                        new Vector([]), new Vector([]), new Vector([]), new Vector([])];
+        
+    }
+}
+
+class AnimatedObject
+{
+    start; current; end; progress;
+    constructor(s, matrix)
+    {
+        this.start = s;
+        this.current = this.start.copy();
+        this.end = this.start.transform(matrix);
+        this.progress = 0;
+    }
+
+    animate()
+    {
+        this.progress++;
+        if(this.progress > 100) 
+        {
+            this.progress = 100;
+            console.log("maxedOut");
+        }
+        this.updateCurrent()
+    }
+
+    updateCurrent()
+    {
+        for (let e = 0; e < this.current.edges.length; e++)
+        {
+            let S = new Vector([
+                (this.end.edges[e].start.elements[0] - this.start.edges[e].start.elements[0])/100*this.progress + this.start.edges[e].start.elements[0],
+                (this.end.edges[e].start.elements[1] - this.start.edges[e].start.elements[1])/100*this.progress + this.start.edges[e].start.elements[1],
+                (this.end.edges[e].start.elements[2] - this.start.edges[e].start.elements[2])/100*this.progress + this.start.edges[e].start.elements[2]
+            ])
+            let E = new Vector([
+                (this.end.edges[e].end.elements[0] - this.start.edges[e].end.elements[0])/100*this.progress + this.start.edges[e].end.elements[0],
+                (this.end.edges[e].end.elements[1] - this.start.edges[e].end.elements[1])/100*this.progress + this.start.edges[e].end.elements[1],
+                (this.end.edges[e].end.elements[2] - this.start.edges[e].end.elements[2])/100*this.progress + this.start.edges[e].end.elements[2]
+            ])
+            this.current.edges[e] = new Edge(S, E);
+        }
+    }
+
+    setProgress(n)
+    {
+        this.progress = Math.min(100, Math.max(n, 0));
+        this.updateCurrent();
+    }
+
+    updateTransformation(matrix)
+    {
+        this.end = this.start.transform(matrix);
+        this.updateCurrent()
+    }
+
 }

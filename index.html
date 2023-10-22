@@ -10,73 +10,95 @@
         <script src="mathComponents.js" async></script>
         <script>
             let projectionMatrix, canvas, vectors, context, scale, originX, originY, objects, o2, rotation;
-            let userInputTest, transformationForm, matrixForm;
+            let userInputTest, transformationForm, matrixForm, animStage, interval, inProgress;
             function initialize()
             {
+                canvas = document.getElementById("canvas");
+                userInputTest = document.getElementById("tester");
+                transformationForm = document.getElementById("transformationForm");
+                transformationForm.addEventListener("submit", (e) => {applyTransformation(e);});
+                inProgress = false;
+                buildMatrixForm();
                 projectionMatrix = new Matrix([
                     new Vector([1, 0]),
                     new Vector([0, 1]),
                     new Vector([0, 0])
                 ])
-                canvas = document.getElementById("canvas");
-                userInputTest = document.getElementById("tester");
-                transformationForm = document.getElementById("transformationForm");
-                transformationForm.addEventListener("submit", (e) => 
-                {
-                    e.preventDefault();
-                    console.log(matrixForm);
-                    let v1 = new Vector([matrixForm[0].value, matrixForm[3].value, matrixForm[6].value]);
-                    let v2 = new Vector([matrixForm[1].value, matrixForm[4].value, matrixForm[7].value]);
-                    let v3 = new Vector([matrixForm[2].value, matrixForm[5].value, matrixForm[8].value]);
-                    transformScene(new Matrix([v1, v2, v3]));
-                    drawScene();
-                });
+                rotation = new Matrix([
+                    new Vector([1, 0, 0]),
+                    new Vector([0, 1, 0]),
+                    new Vector([0, 0, 1])
+                ])
                 document.addEventListener('keydown', () =>  
                 {
                     let code = event.code;
                     if (code === "KeyA")
                     {
-                        for (let i = 0; i < objects.length; i++)
-                        {
-                            objects[i].rotate(-1, 1);
-                        }
+                        rotation = getRotationMatrix(-1, 1).multiply(rotation);
                         drawScene();
                     }
                     else if (code === "KeyD")
                     {
-                        for (let i = 0; i < objects.length; i++)
-                        {
-                            objects[i].rotate(1, 1);
-                        }
+                        rotation = getRotationMatrix(1, 1).multiply(rotation);
                         drawScene();
                     }
                     if (code === "KeyW")
                     {
-                        for (let i = 0; i < objects.length; i++)
-                        {
-                            objects[i].rotate(1, 2);
-                        }
+                        rotation = getRotationMatrix(1, 2).multiply(rotation);
                         drawScene();
                     }
                     else if (code === "KeyS")
                     {
-                        for (let i = 0; i < objects.length; i++)
-                        {
-                            objects[i].rotate(-1, 2);
-                        }
+                        rotation = getRotationMatrix(-1, 2).multiply(rotation);
                         drawScene();
                     }
                 }, false);
                 context = canvas.getContext("2d");
                 context.lineWidth = 2;
                 scale = 32;
+                animStage = 0;
                 frameOriginX = 256;
                 frameOriginY = 256;
                 objects = [];
-                rotation = new Vector([0, 0, 0]);
                 origin = new Vector([0, 0, -16])
-                objects.push(new Cube(3));
-                buildMatrixForm();
+                objects.push(new AnimatedObject(new Cube(3), new Matrix([new Vector([2, 0, 0]), new Vector([0, 2, 0]), new Vector([0, 0, 2])])));
+                drawScene();
+            }
+
+            function applyTransformation(e)
+            {
+                e.preventDefault();
+                for (let i = 0; i < matrixForm.length; i++)
+                {
+                    if (matrixForm[i].value === "")
+                    {
+                        matrixForm[i].value = "0";                    
+                    }
+                }
+                let v1 = new Vector([matrixForm[0].value, matrixForm[3].value, matrixForm[6].value]);
+                let v2 = new Vector([matrixForm[1].value, matrixForm[4].value, matrixForm[7].value]);                    
+                let v3 = new Vector([matrixForm[2].value, matrixForm[5].value, matrixForm[8].value]);
+                let m = new Matrix([v1, v2, v3]);
+                for (let i = 0; i < objects.length; i++)
+                {
+                    objects[i].updateTransformation(m);
+                }
+                interval = setInterval(animate, 40);
+                drawScene();
+            }
+            
+            function animate()
+            {
+                for (let i = 0; i < objects.length; i++)
+                {
+                    objects[i].animate();
+                }
+                animStage++;
+                if (animStage >= 100)
+                {
+                    clearInterval(interval);
+                    animStage = 0;
+                }
                 drawScene();
             }
 
@@ -90,13 +112,14 @@
                         let el = document.createElement("input");
                         el.setAttribute("step", "0.01");
                         el.setAttribute("type", "number");
+                        el.setAttribute("placeholder", "0");
                         transformationForm.appendChild(el);
                         matrixForm.push(el);
                     }
                     transformationForm.appendChild(document.createElement("br"));
                 }
-                console.log(matrixForm);
             }
+
             function drawVector(vector)
             {
                 let v = vector.transform(projectionMatrix);
@@ -105,6 +128,43 @@
                 context.lineTo(frameOriginX + v.elements[0]*scale, frameOriginY - v.elements[1]*scale);
                 context.strokeStyle = "#ff0000";
                 context.stroke();
+            }
+
+            function getRotationMatrix(degrees, axis)
+            {
+                let x = Math.PI * degrees / 180;
+                let m;
+                switch (axis)
+                {
+                    case 0:
+                        m = new Matrix([
+                            new Vector([Math.cos(x), Math.sin(x), 0]),
+                            new Vector([-Math.sin(x), Math.cos(x), 0]),
+                            new Vector([0, 0, 1])
+                        ]);
+                        break;
+                    case 1:
+                        m = new Matrix([
+                            new Vector([Math.cos(x), 0, Math.sin(x)]),
+                            new Vector([0, 1, 0]),
+                            new Vector([-Math.sin(x), 0, Math.cos(x)])
+                        ]);
+                        break;
+                    case 2:
+                        m = new Matrix([
+                            new Vector([1, 0, 0]),
+                            new Vector([0, Math.cos(x), Math.sin(x)]),
+                            new Vector([0, -Math.sin(x), Math.cos(x)])
+                        ]);
+                        break;
+                    default:
+                        m = new Matrix([
+                            new Vector([Math.cos(x), Math.sin(x), 0]),
+                            new Vector([-Math.sin(x), Math.cos(x), 0]),
+                            new Vector([0, 0, 1])
+                        ]);
+                }
+                return m;
             }
 
             function drawEdge(edge)
@@ -207,16 +267,12 @@
                 let queue = [];
                 for (let i = 0; i < objects.length; i++)
                 {
-                    for (let j = 0; j < objects[i].edges.length; j++)
+                    for (let j = 0; j < objects[i].current.edges.length; j++)
                     {
-                        let edge = objects[i].edges[j].copy();
-                        edge.rotate(rotation.elements[0], 0);
-                        edge.rotate(rotation.elements[1], 1);
-                        edge.rotate(rotation.elements[2], 2);
+                        let edge = objects[i].current.edges[j].transform(rotation);
                         queue.push(edge);
                     }
                 }
-                console.log(queue);
                 // Place elements in queue into drawing order
                 // toDraw ordered by furthest to closest
                 let toDraw = [];
@@ -249,24 +305,43 @@
             {
                 for (let i = 0; i < objects.length; i++)
                 {
-                    for (let j = 0; j < objects[i].edges.length; j++)
-                    {
-                        objects[i].edges[j].start = objects[i].edges[j].start.transform(matrix);
-                        objects[i].edges[j].end = objects[i].edges[j].end.transform(matrix);
-                    }
+                    objects[i].updateTransformation(matrix);
+                    objects[i].setProgress(100); 
                 }
+                drawScene()
             }
 
-            function test(axis)
+            function reset(object)
             {
-                
+                objects = [new AnimatedObject(object, new Matrix([new Vector([1, 0, 0]), new Vector([0, 1, 0]), new Vector([0, 0, 1])]))];
+                drawScene();
+            }
+
+            function recenter()
+            {
+                rotation = new Matrix([
+                    new Vector([1, 0, 0]),
+                    new Vector([0, 1, 0]),
+                    new Vector([0, 0, 1])
+                ])
+                drawScene();
+            }
+
+            function test()
+            {
+                for (let i = 0; i < objects.length; i++)
+                {
+                    objects[i].animate();
+                    objects[i].updateCurrent();
+                }
+                drawScene();
             }
 
             function test2()
             {
                 for (let i = 0; i < objects.length; i++)
                 {
-                    objects[i].rotate(9, 1);
+                    objects[i].current.rotate(9, 1);
                 }
                 drawScene();
             }
@@ -278,7 +353,8 @@
         <form id="transformationForm">
             <button type="submit">Submit</button> <br>
         </form>
-        <button onclick="objects=[new Cube(3)]; drawScene();">Reset Cube</button>
-        <button onclick="objects=[new Dodecahedron()]; drawScene();">Reset Dodecahedron</button>
+        <button onclick="reset(new Cube(3));">Reset Cube</button>
+        <button onclick="reset(new Dodecahedron());">Reset Dodecahedron</button>
+        <button onclick="recenter();">Recenter View</button>
     </body>
 </html>
