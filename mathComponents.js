@@ -346,7 +346,9 @@ class AnimatedObject
 
     updateTransformation(matrix)
     {
+        this.start = this.current;
         this.end = this.start.transform(matrix);
+        this.progress = 0;
         this.updateCurrent()
     }
 
