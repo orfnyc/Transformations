@@ -312,27 +312,28 @@ class AnimatedObject
     animate()
     {
         this.progress++;
-        if(this.progress > 100) 
+        if(this.progress >= 25) 
         {
-            this.progress = 100;
+            this.progress = 25;
             console.log("maxedOut");
         }
         this.updateCurrent()
     }
 
     updateCurrent()
-    {
+    { 
+        console.log(`IN UPDATECURRENT: ${this.progress}`);
         for (let e = 0; e < this.current.edges.length; e++)
         {
             let S = new Vector([
-                (this.end.edges[e].start.elements[0] - this.start.edges[e].start.elements[0])/100*this.progress + this.start.edges[e].start.elements[0],
-                (this.end.edges[e].start.elements[1] - this.start.edges[e].start.elements[1])/100*this.progress + this.start.edges[e].start.elements[1],
-                (this.end.edges[e].start.elements[2] - this.start.edges[e].start.elements[2])/100*this.progress + this.start.edges[e].start.elements[2]
+                (this.end.edges[e].start.elements[0] - this.start.edges[e].start.elements[0])/25*this.progress + this.start.edges[e].start.elements[0],
+                (this.end.edges[e].start.elements[1] - this.start.edges[e].start.elements[1])/25*this.progress + this.start.edges[e].start.elements[1],
+                (this.end.edges[e].start.elements[2] - this.start.edges[e].start.elements[2])/25*this.progress + this.start.edges[e].start.elements[2]
             ])
             let E = new Vector([
-                (this.end.edges[e].end.elements[0] - this.start.edges[e].end.elements[0])/100*this.progress + this.start.edges[e].end.elements[0],
-                (this.end.edges[e].end.elements[1] - this.start.edges[e].end.elements[1])/100*this.progress + this.start.edges[e].end.elements[1],
-                (this.end.edges[e].end.elements[2] - this.start.edges[e].end.elements[2])/100*this.progress + this.start.edges[e].end.elements[2]
+                (this.end.edges[e].end.elements[0] - this.start.edges[e].end.elements[0])/25*this.progress + this.start.edges[e].end.elements[0],
+                (this.end.edges[e].end.elements[1] - this.start.edges[e].end.elements[1])/25*this.progress + this.start.edges[e].end.elements[1],
+                (this.end.edges[e].end.elements[2] - this.start.edges[e].end.elements[2])/25*this.progress + this.start.edges[e].end.elements[2]
             ])
             this.current.edges[e] = new Edge(S, E);
         }
@@ -341,12 +342,11 @@ class AnimatedObject
     setProgress(n)
     {
         this.progress = Math.min(100, Math.max(n, 0));
-        this.updateCurrent();
     }
 
     updateTransformation(matrix)
     {
-        this.start = this.current;
+        this.start = this.end;
         this.end = this.start.transform(matrix);
         this.progress = 0;
         this.updateCurrent()
