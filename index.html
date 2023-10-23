@@ -29,9 +29,9 @@
                     new Vector([0, 1, 0]),
                     new Vector([0, 0, 1])
                 ])
-                document.addEventListener('keydown', () =>  
+                document.addEventListener('keydown', (e) =>  
                 {
-                    let code = event.code;
+                    let code = e.code;
                     if (code === "KeyA")
                     {
                         rotation = getRotationMatrix(-1, 1).multiply(rotation);
@@ -53,6 +53,7 @@
                         drawScene();
                     }
                 }, false);
+                
                 context = canvas.getContext("2d");
                 context.lineWidth = 2;
                 scale = 32;
