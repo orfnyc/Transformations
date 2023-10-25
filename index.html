@@ -1,16 +1,11 @@
 <!DOCTYPE HTML>
 <html>
     <head>
-        <style>
-            canvas
-            {
-                background-color: black;
-            }
-        </style>
+        <link rel="stylesheet" href="styles.css">
         <script src="mathComponents.js" async></script>
         <script>
             let projectionMatrix, canvas, vectors, context, scale, originX, originY, objects, rotation, zoom;
-            let transformationForm, matrixForm, animStage, interval, inProgress;
+            let transformationForm, matrixForm, animStage, interval, inProgress, animFrames;
             function initialize()
             {
                 canvas = document.getElementById("canvas");
@@ -81,6 +76,7 @@
                 context.lineWidth = 2;
                 scale = 32;
                 animStage = 0;
+                animFrames = 20;
                 frameOriginX = 256;
                 frameOriginY = 256;
                 objects = [];
@@ -94,7 +90,6 @@
                 e.preventDefault();
                 if (!inProgress)
                 {
-                    console.log("SETTING INTERVAL");
                     inProgress = true;
                     for (let i = 0; i < matrixForm.length; i++)
                     {
@@ -109,10 +104,10 @@
                     let m = new Matrix([v1, v2, v3]);
                     for (let i = 0; i < objects.length; i++)
                     {
+                        objects[i].animationDuration = animFrames;
                         objects[i].updateTransformation(m);
-                        console.log(objects[i].progress);
                     }
-                    interval = setInterval(animate, 40);
+                    interval = setInterval(animate, 25);
                 }
             }
             
@@ -125,7 +120,7 @@
                 }
                 animStage++;
                 console.log(`ANIM STAGE: ${animStage}`);
-                if (animStage >= 25)
+                if (animStage >= animFrames)
                 {
                     clearInterval(interval);
                     animStage = 0;
@@ -137,18 +132,21 @@
             function buildMatrixForm()
             {
                 matrixForm = [];
+                transformationFormInner = document.getElementById("transformationFormInner");
                 for (let i = 0; i < 3; i++)
                 {
                     for (let j = 0; j < 3; j++)
                     {
                         let el = document.createElement("input");
                         el.setAttribute("step", "0.01");
-                        el.setAttribute("type", "number");
-                        el.setAttribute("placeholder", "0");
-                        transformationForm.appendChild(el);
+                        el.setAttribute("type", "text");
+                        el.setAttribute("class", "matrixInput");
+                        el.setAttribute("inputmode", "numeric");
+                        el.value = (i === j) ? 1 : 0;
+                        transformationFormInner.appendChild(el);
                         matrixForm.push(el);
                     }
-                    transformationForm.appendChild(document.createElement("br"));
+                    transformationFormInner.appendChild(document.createElement("br"));
                 }
             }
 
@@ -338,7 +336,7 @@
                 for (let i = 0; i < objects.length; i++)
                 {
                     objects[i].updateTransformation(matrix);
-                    objects[i].setProgress(25); 
+                    objects[i].setProgress(animFrames); 
                 }
                 drawScene()
             }
@@ -361,22 +359,27 @@
                     new Vector([0, 1, 0]),
                     new Vector([0, 0, 1])
                 ]);
-                zoom = new Matrix([
-                    new Vector([1, 0, 0]),
-                    new Vector([0, 1, 0]),
-                    new Vector([0, 0, 1])
-                ]);
                 drawScene();
             }
         </script>
     </head>
     <body onload="initialize();">
-        <canvas id="canvas" width="512" height="512"></canvas>
-        <form id="transformationForm">
-            <button type="submit">Submit</button> <br>
-        </form>
-        <button onclick="reset(new Cube(3));">Reset Cube</button>
-        <button onclick="reset(new Dodecahedron());">Reset Dodecahedron</button>
-        <button onclick="recenter();">Recenter View</button>
+        <div class="row">
+            <div class="left">
+                <canvas id="canvas" width="512" height="512"></canvas>
+            </div>
+            <div class="right">
+                <form id="transformationForm">
+                    <div id="transformationFormInner">   
+                    </div>
+                    <div class="submit">
+                        <button class="submitButton" type="submit">Submit</button>
+                    </div> 
+                </form>
+                <button onclick="reset(new Cube(3));">New Cube</button>
+                <button onclick="reset(new Dodecahedron());">New Dodecahedron</button>
+                <button onclick="recenter();">Recenter View</button>
+            </div>
+        </div>
     </body>
 </html>
