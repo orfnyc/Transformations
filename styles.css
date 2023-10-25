@@ -1,0 +1,88 @@
+.row 
+{
+    display: flex;
+    text-align: center;
+    direction: column-reverse;
+}
+
+@font-face 
+{
+    font-family: abel;
+    src: url(Abel-Regular.ttf);
+}
+
+.left
+{
+    display: inline-flex;
+    text-align: right;
+}
+
+.right
+{
+    flex: 50%;
+    text-align: left;
+}
+
+canvas
+{
+    background-color: black;
+}
+
+body
+{
+    background-color: #635380;
+}
+
+.matrixInput
+{
+    background-color: #ECE2D0;
+    border: none;
+    border-radius: 5px;
+    margin: 5px;
+    padding: 5px;
+    width: 50px;
+    text-align: center;
+    font-size: 24pt;
+    font-family: abel;
+}
+
+.submit
+{
+    text-align: center;
+}
+
+button
+{
+    transition-duration: 0.4s;
+    background-color: #ECE2D0;
+    font-family: abel;
+    border: none;
+    border-radius: 5px;
+    margin: 10px;
+    display: block;
+    font-size: 24pt;
+}
+
+button:hover
+{
+    background-color: #6EA4BF;
+}
+
+@media (max-width: 800px)
+{
+    .row
+    {
+        display: block;
+        text-align: left;
+    }
+
+    .left
+    {
+        flex: 50%;
+        text-align: left;
+    }
+    .right
+    {
+        text-align: left;
+    }
+}
