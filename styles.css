@@ -40,7 +40,7 @@ body
     border-radius: 5px;
     margin: 5px;
     padding: 5px;
-    width: 50px;
+    width: 75px;
     text-align: center;
     font-size: 24pt;
     font-family: abel;
@@ -61,6 +61,22 @@ button
     margin: 10px;
     display: block;
     font-size: 24pt;
+}
+
+.queueElement > tr > td
+{
+    border: none;
+    background-color: #ECE2D0;
+    border-radius: 5px;
+    width: 75px;
+    text-align: center;
+    font-family: abel;
+    font-size: 12pt;
+}
+
+.queueElement
+{
+    margin: 10px
 }
 
 button:hover

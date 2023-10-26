@@ -316,7 +316,6 @@ class AnimatedObject
         if(this.progress >= this.animationDuration) 
         {
             this.progress = this.animationDuration;
-            console.log("maxedOut");
         }
         this.updateCurrent()
     }
