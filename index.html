@@ -36,22 +36,22 @@
                     let code = e.code;
                     if (code === "KeyA")
                     {
-                        rotation = getRotationMatrix(-1, 1).multiply(rotation);
+                        rotation = getRotationMatrix(-2, 1).multiply(rotation);
                         drawScene();
                     }
                     else if (code === "KeyD")
                     {
-                        rotation = getRotationMatrix(1, 1).multiply(rotation);
+                        rotation = getRotationMatrix(2, 1).multiply(rotation);
                         drawScene();
                     }
                     if (code === "KeyW")
                     {
-                        rotation = getRotationMatrix(1, 2).multiply(rotation);
+                        rotation = getRotationMatrix(2, 2).multiply(rotation);
                         drawScene();
                     }
                     else if (code === "KeyS")
                     {
-                        rotation = getRotationMatrix(-1, 2).multiply(rotation);
+                        rotation = getRotationMatrix(-2, 2).multiply(rotation);
                         drawScene();
                     }
                     if (code === "KeyE")
@@ -75,11 +75,11 @@
                 }, false);
                 
                 context = canvas.getContext("2d");
-                transformationQueue = [];
+                transformationQueue = new Map();
                 context.lineWidth = 2;
                 scale = 32;
                 animStage = 0;
-                animFrames = 20;
+                animFrames = 40;
                 frameOriginX = 256;
                 frameOriginY = 256;
                 objects = [];
@@ -102,7 +102,7 @@
                 let v2 = new Vector([matrixForm[1].value, matrixForm[4].value, matrixForm[7].value]);                    
                 let v3 = new Vector([matrixForm[2].value, matrixForm[5].value, matrixForm[8].value]);
                 let m = new Matrix([v1, v2, v3]);
-                transformationQueue.push(m);
+                let queueElement = document.createElement("div");
                 let table = document.createElement("table");
                 for (let i = 0; i < 3; i++)
                 {
@@ -117,19 +117,34 @@
                 }
                 table.setAttribute("id","queueElement");
                 table.setAttribute("class", "queueElement");
-                queueDisplay.appendChild(table);
+                queueElement.appendChild(table)
+                let remove = document.createElement("button");
+                remove.innerHTML = "Remove";
+                remove.setAttribute("onclick", "removeFromQueue(this)");
+                queueElement.appendChild(remove);
+                queueElement.setAttribute("class", "queueSpan");
+                queueDisplay.appendChild(queueElement);
+                transformationQueue.set(queueElement, m);
+            }
+
+            function removeFromQueue(removeButton)
+            {
+                transformationQueue.delete(removeButton.parentElement);
+                removeButton.parentElement.remove();
             }
 
             function beginTransform()
             {
-                if (transformationQueue.length != 0)
+                if (transformationQueue.size != 0)
                 {
-                    applyTransformation(transformationQueue.shift());
+                    applyTransformation(transformationQueue.values().next().value);
+                    transformationQueue.delete(transformationQueue.keys().next().value);
                 }
             }
 
             function applyTransformation(m)
             {
+                queueDisplay.querySelector(".queueSpan").setAttribute("highlight", "true");
                 for (let i = 0; i < objects.length; i++)
                 {
                     objects[i].animationDuration = animFrames;
@@ -147,11 +162,12 @@
                 animStage++;
                 if (animStage >= animFrames)
                 {
+
                     clearInterval(interval);
                     animStage = 0;
                     inProgress = false;
-                    setTimeout(beginTransform, 500);
-                    let q = queueDisplay.querySelector("#queueElement");
+                    setTimeout(beginTransform, 250);
+                    let q = queueDisplay.querySelector(".queueSpan");
                     q.remove();
                 }
                 drawScene();
@@ -392,26 +408,19 @@
         </script>
     </head>
     <body onload="initialize();">
-        <div class="row">
-            <div class="left">
-                <canvas id="canvas" width="512" height="512"></canvas>
+        <button onclick="reset(new Cube(3));">New Cube</button>
+        <button onclick="reset(new Dodecahedron());">New Dodecahedron</button>
+        <button onclick="recenter();">Recenter View</button>
+        <br>
+        <canvas id="canvas" style="border: 1px solid white" width="512" height="512"></canvas>
+        <form id="transformationForm">
+            <div id="transformationFormInner">   
             </div>
-            <div class="right">
-                <form id="transformationForm">
-                    <div id="transformationFormInner">   
-                    </div>
-                    <div class="submit">
-                        <button class="submitButton" type="submit">Add to queue</button>
-                    </div> 
-                </form>
-                <button onclick="beginTransform()">Transform</button>
-                <button onclick="reset(new Cube(3));">New Cube</button>
-                <button onclick="reset(new Dodecahedron());">New Dodecahedron</button>
-                <button onclick="recenter();">Recenter View</button>
-            </div>
-        </div>
-        <div id="queue">
-
-        </div>
+            <div class="submit">
+                <button class="submitButton" type="submit" onclick="console.log('submit')">Add to queue</button>
+                <button onclick="beginTransform(); console.log('transform');">Transform</button>
+            </div> 
+        </form>
+        <div id="queue"></div>
     </body>
 </html>
