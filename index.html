@@ -256,13 +256,13 @@
                                                         frameOriginY - end.elements[1]*scale);
                 // 255, 200, 75
                 // 50, 0, 80
-                let r = (255+50) / 2 + edge.start.elements[2] * (-255+50)/8;
-                let g = (200+0) / 2 + edge.start.elements[2] * (-200+0)/8;
-                let b = (75+80) / 2 + edge.start.elements[2] * (-75+80)/8;
+                let r = Math.min(255, Math.max(50, (255+50) / 2 + edge.start.elements[2] * (-255+50)/6));
+                let g = Math.min(200, Math.max(0, (200+0) / 2 + edge.start.elements[2] * (-200+0)/6));
+                let b = Math.min(80, Math.max(75, (75+80) / 2 + edge.start.elements[2] * (-75+80)/86));
                 grd.addColorStop(0, `rgb(${r}, ${g}, ${b})`);
-                r = (255+50) / 2 + edge.end.elements[2] * (-255+50)/8;
-                g = (200+0) / 2 + edge.end.elements[2] * (-200+0)/8;
-                b = (75+80) / 2 + edge.end.elements[2] * (-75+80)/8;
+                r = Math.min(255, Math.max(50, (255+50) / 2 + edge.end.elements[2] * (-255+50)/6));
+                g = Math.min(200, Math.max(0, (200+0) / 2 + edge.end.elements[2] * (-200+0)/6));
+                b = Math.min(80, Math.max(75, (75+80) / 2 + edge.end.elements[2] * (-75+80)/6));
                 grd.addColorStop(1, `rgb(${r}, ${g}, ${b})`);
                 context.strokeStyle = grd;
                 context.stroke();
