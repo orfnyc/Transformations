@@ -8,15 +8,31 @@ body
 {
     background-color: black;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center; 
+    font-family: abel; 
 }
 
 .queueElement
 {
     margin: auto;
+    margin-top: .25rem;
+    margin-bottom: .25rem;
     color: white;
     text-align: center;
     border: 1px solid white;
-    width: 200px;
+}
+
+.queueElement > tr > td
+{
+    background-color: black;
+    color: white;
+    text-align: center;
+    width: 1.75rem;
+    padding: 10px;
+    font-size: 10pt;
 }
 
 .matrixInput
@@ -24,8 +40,42 @@ body
     background-color: black;
     color: white;
     text-align: center;
-    width: 75px;
+    width: 1.75rem;
     padding: 10px;
+}
+
+[highlight|="true"]
+{
+    border: 4px solid lightskyblue;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+button
+{
+    background-color: black;
+    border: 1px solid white;
+    color: white;
+}
+
+button:hover
+{
+    border: 1px solid blueviolet;
+    color: blueviolet;
+}
+
+input[type=text]
+{
+    outline: none;
+    border: 1px solid black;
+    font-family: abel;
+    font-size: 10pt;
+}
+
+input[type=text]:focus 
+{
+    outline: none;
+    border: 1px solid blueviolet;
 }
 
 #transformationFormInner
@@ -35,6 +85,34 @@ body
     margin: 10px;
 }
 
+.main-display 
+{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
+.buttons
+{
+    width: 100%;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+
+}
+
+.recenter-btn 
+{
+    position: absolute;
+    left: 0;
+    translate: 12% 150%;
+}
+
+canvas {
+    width: 50vw;
+    max-width: 550px;
+    margin: 5px;
+}
 
 

@@ -33,6 +33,7 @@
 
                 document.addEventListener('keydown', (e) =>  
                 {
+                    console.log(e);
                     let code = e.code;
                     if (code === "KeyA")
                     {
@@ -57,18 +58,18 @@
                     if (code === "KeyE")
                     {
                         zoom = new Matrix([
-                            new Vector([1.01, 0, 0]),
-                            new Vector([0, 1.01, 0]),
-                            new Vector([0, 0, 1.01])
+                            new Vector([1.02, 0, 0]),
+                            new Vector([0, 1.02, 0]),
+                            new Vector([0, 0, 1.02])
                         ]).multiply(zoom);
                         drawScene();
                     }
                     else if (code === "KeyQ")
                     {
                         zoom = new Matrix([
-                            new Vector([0.99, 0, 0]),
-                            new Vector([0, 0.99, 0]),
-                            new Vector([0, 0, 0.99])
+                            new Vector([0.98, 0, 0]),
+                            new Vector([0, 0.98, 0]),
+                            new Vector([0, 0, 0.98])
                         ]).multiply(zoom);
                         drawScene();
                     }
@@ -91,11 +92,12 @@
             function addToQueue(e)
             {
                 e.preventDefault();
+                console.log("addToQueue");
                 for (let i = 0; i < matrixForm.length; i++)
                 {
                     if (matrixForm[i].value === "")
                     {
-                        matrixForm[i].value = "0";                    
+                        matrixForm[i].value = "0";                   
                     }
                 }
                 let v1 = new Vector([matrixForm[0].value, matrixForm[3].value, matrixForm[6].value]);
@@ -144,7 +146,7 @@
 
             function applyTransformation(m)
             {
-                queueDisplay.querySelector(".queueSpan").setAttribute("highlight", "true");
+                queueDisplay.querySelector(".queueElement").setAttribute("highlight", "true");
                 for (let i = 0; i < objects.length; i++)
                 {
                     objects[i].animationDuration = animFrames;
@@ -254,13 +256,13 @@
                                                         frameOriginY - end.elements[1]*scale);
                 // 255, 200, 75
                 // 50, 0, 80
-                let r = (255+50) / 2 + edge.start.elements[2] * (-255+50)/12
-                let g = (200+0) / 2 + edge.start.elements[2] * (-200+0)/12
-                let b = (75+80) / 2 + edge.start.elements[2] * (-75+80)/12
+                let r = (255+50) / 2 + edge.start.elements[2] * (-255+50)/8;
+                let g = (200+0) / 2 + edge.start.elements[2] * (-200+0)/8;
+                let b = (75+80) / 2 + edge.start.elements[2] * (-75+80)/8;
                 grd.addColorStop(0, `rgb(${r}, ${g}, ${b})`);
-                r = (255+50) / 2 + edge.end.elements[2] * (-255+50)/12
-                g = (200+0) / 2 + edge.end.elements[2] * (-200+0)/12
-                b = (75+80) / 2 + edge.end.elements[2] * (-75+80)/12
+                r = (255+50) / 2 + edge.end.elements[2] * (-255+50)/8;
+                g = (200+0) / 2 + edge.end.elements[2] * (-200+0)/8;
+                b = (75+80) / 2 + edge.end.elements[2] * (-75+80)/8;
                 grd.addColorStop(1, `rgb(${r}, ${g}, ${b})`);
                 context.strokeStyle = grd;
                 context.stroke();
@@ -408,19 +410,22 @@
         </script>
     </head>
     <body onload="initialize();">
-        <button onclick="reset(new Cube(3));">New Cube</button>
-        <button onclick="reset(new Dodecahedron());">New Dodecahedron</button>
-        <button onclick="recenter();">Recenter View</button>
-        <br>
-        <canvas id="canvas" style="border: 1px solid white" width="512" height="512"></canvas>
+        <div class="main-display">
+            <div class="buttons">
+                <button onclick="reset(new Cube(3));">New Cube</button>
+                <button onclick="reset(new Dodecahedron());">New Dodecahedron</button>
+            </div>
+            <button class="recenter-btn" onclick="recenter();">Recenter View</button>
+            <!-- <br> -->
+            <canvas id="canvas" style="border: 1px solid white" width="512" height="512"></canvas>
+        </div>
         <form id="transformationForm">
             <div id="transformationFormInner">   
             </div>
-            <div class="submit">
-                <button class="submitButton" type="submit" onclick="console.log('submit')">Add to queue</button>
-                <button onclick="beginTransform(); console.log('transform');">Transform</button>
-            </div> 
+            <br>
+            <button class="submitButton" type="submit">Add to queue</button>
         </form>
+        <button onclick="beginTransform();">Transform</button>
         <div id="queue"></div>
     </body>
 </html>
