@@ -285,17 +285,16 @@ class Dodecahedron extends StillObject
     }
 }
 
-class Icosahedron extends StillObject
+class BasisVectors extends StillObject
 {
     constructor()
     {
         super([]);
-        let gR = (1 + Math.sqrt(5)) / 2;
-        let vertices = [new Vector([0, 1, gr]), new Vector([0, 1, -gr]), new Vector([0, -1, gr]), new Vector([0, -1, -gr]),
-                        new Vector([1]), new Vector([]), new Vector([]), new Vector([]),
-                        new Vector([]), new Vector([]), new Vector([]), new Vector([])];
-        
+        this.edges.push(new Edge(new Vector([0, 0, 0]), new Vector([1, 0, 0])));
+        this.edges.push(new Edge(new Vector([0, 0, 0]), new Vector([0, 1, 0])));
+        this.edges.push(new Edge(new Vector([0, 0, 0]), new Vector([0, 0, 1])));
     }
+
 }
 
 class AnimatedObject

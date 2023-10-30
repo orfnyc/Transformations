@@ -1,5 +1,5 @@
 let projectionMatrix, canvas, vectors, context, scale, originX, originY, objects, rotation, zoom;
-let transformationForm, matrixForm, animStage, interval, inProgress, animFrames, transformationQueue;
+let transformationForm, matrixForm, animStage, interval, animFrames, transformationQueue;
 let queueDisplay;
 function initialize() 
 {
@@ -7,7 +7,6 @@ function initialize()
     transformationForm = document.getElementById("transformationForm");
     transformationForm.addEventListener("submit", (e) => { addToQueue(e); });
     queueDisplay = document.getElementById("queue");
-    inProgress = false;
     buildMatrixForm();
     projectionMatrix = new Matrix([
         new Vector([1, 0]),
@@ -89,7 +88,7 @@ function addToQueue(e)
     console.log("addToQueue");
     for (let i = 0; i < matrixForm.length; i++) 
     {
-        if (matrixForm[i].value === "") 
+        if (isNaN(matrixForm[i].value)) 
         {
             matrixForm[i].value = "0";
         }
@@ -131,7 +130,7 @@ function removeFromQueue(removeButton)
 
 function beginTransform() 
 {
-    if (transformationQueue.size != 0) 
+    if (animStage === 0 && transformationQueue.size != 0) 
     {
         applyTransformation(transformationQueue.values().next().value);
         transformationQueue.delete(transformationQueue.keys().next().value);
@@ -161,7 +160,6 @@ function animate()
 
         clearInterval(interval);
         animStage = 0;
-        inProgress = false;
         setTimeout(beginTransform, 250);
         let q = queueDisplay.querySelector(".queueSpan");
         q.remove();
@@ -249,14 +247,14 @@ function drawEdge(edge)
         frameOriginX + end.elements[0] * scale,
         frameOriginY - end.elements[1] * scale);
     // 255, 200, 75
-    // 50, 0, 80
-    let r = Math.min(255, Math.max(50, (255 + 50) / 2 + edge.start.elements[2] * (-255 + 50) / 6));
+    // 30, 0, 60
+    let r = Math.min(255, Math.max(30, (255 + 30) / 2 + edge.start.elements[2] * (-255 + 30) / 6));
     let g = Math.min(200, Math.max(0, (200 + 0) / 2 + edge.start.elements[2] * (-200 + 0) / 6));
-    let b = Math.min(80, Math.max(75, (75 + 80) / 2 + edge.start.elements[2] * (-75 + 80) / 86));
+    let b = Math.min(60, Math.max(75, (75 + 60) / 2 + edge.start.elements[2] * (-75 + 60) / 6));
     grd.addColorStop(0, `rgb(${r}, ${g}, ${b})`);
-    r = Math.min(255, Math.max(50, (255 + 50) / 2 + edge.end.elements[2] * (-255 + 50) / 6));
+    r = Math.min(255, Math.max(30, (255 + 30) / 2 + edge.end.elements[2] * (-255 + 30) / 6));
     g = Math.min(200, Math.max(0, (200 + 0) / 2 + edge.end.elements[2] * (-200 + 0) / 6));
-    b = Math.min(80, Math.max(75, (75 + 80) / 2 + edge.end.elements[2] * (-75 + 80) / 6));
+    b = Math.min(60, Math.max(75, (75 + 60) / 2 + edge.end.elements[2] * (-75 + 60) / 6));
     grd.addColorStop(1, `rgb(${r}, ${g}, ${b})`);
     context.strokeStyle = grd;
     context.stroke();
