@@ -93,7 +93,12 @@ class Vector
 
     copy()
     {
-        return new Vector([this.elements[0], this.elements[1], this.elements[2]]);
+        let res = [];
+        for (let e = 0; e < this.elements.length; e++)
+        {
+            res.push(this.elements[e]);
+        }
+        return new Vector(res);
     }
 }
 
@@ -120,7 +125,7 @@ class Matrix
         return new Matrix(result);
     }
 
-    // THIS * OTHER
+    // OTHER * THIS
     // returns new matrix, does not mutate this
     multiply(other)
     {
@@ -152,14 +157,11 @@ class Edge
 {
     start;
     end;
-    color;
-    constructor(v1, v2, color)
+    constructor(v1, v2)
     {
         this.start = v1;
         this.end = v2;
-        this.color = (color != undefined) ? color : "#FF0000";
     }
-
     rotate(degrees, axis)
     {
         this.start.rotate(degrees, axis);
@@ -342,7 +344,7 @@ class AnimatedObject
         this.progress = Math.min(100, Math.max(n, 0));
     }
 
-    updateTransformation(matrix)
+    setTransformation(matrix)
     {
         this.start = this.end;
         this.end = this.start.transform(matrix);

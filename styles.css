@@ -12,7 +12,6 @@ body
     flex-direction: column;
     gap: 0.5rem;
     align-items: center; 
-    font-family: abel; 
 }
 
 .queueElement
@@ -72,7 +71,7 @@ input[type=text]
     font-size: 10pt;
 }
 
-input[type=text]:focus 
+input:focus 
 {
     outline: none;
     border: 1px solid blueviolet;
@@ -85,7 +84,7 @@ input[type=text]:focus
     margin: 10px;
 }
 
-.main-display 
+.mainDisplay 
 {
     position: relative;
     display: flex;
@@ -99,10 +98,9 @@ input[type=text]:focus
     display: flex;
     gap: 1rem;
     justify-content: center;
-
 }
 
-.recenter-btn 
+.recenterButton 
 {
     position: absolute;
     left: 0;
