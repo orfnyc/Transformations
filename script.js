@@ -66,6 +66,10 @@ function initialize()
             ]).multiply(zoom);
             drawScene();
         }
+        if (code === "KeyR")
+        {
+            recenter();
+        }
     }, false);
 
     context = canvas.getContext("2d");
@@ -143,7 +147,7 @@ function applyTransformation(m)
     for (let i = 0; i < objects.length; i++) 
     {
         objects[i].animationDuration = animFrames;
-        objects[i].updateTransformation(m);
+        objects[i].setTransformation(m);
     }
     interval = setInterval(animate, 25);
 }
@@ -176,7 +180,6 @@ function buildMatrixForm()
         for (let j = 0; j < 3; j++) 
         {
             let el = document.createElement("input");
-            el.setAttribute("step", "0.01");
             el.setAttribute("type", "text");
             el.setAttribute("class", "matrixInput");
             el.setAttribute("inputmode", "numeric");
@@ -186,16 +189,6 @@ function buildMatrixForm()
         }
         transformationFormInner.appendChild(document.createElement("br"));
     }
-}
-
-function drawVector(vector) 
-{
-    let v = vector.transform(projectionMatrix);
-    context.beginPath();
-    context.moveTo(frameOriginX, frameOriginY);
-    context.lineTo(frameOriginX + v.elements[0] * scale, frameOriginY - v.elements[1] * scale);
-    context.strokeStyle = "#ff0000";
-    context.stroke();
 }
 
 function getRotationMatrix(degrees, axis) 
@@ -267,7 +260,6 @@ function drawEdge(edge)
 // 3: Segments have >1 insection
 function orientation(edge1, edge2) 
 {
-    // Important information about line each edge is a segment of
     // TO DO: Special case for vertical line
     let m1 = (edge1.start.elements[1] - edge1.end.elements[1]) / (edge1.start.elements[0] - edge1.end.elements[0]);
     let m2 = (edge2.start.elements[1] - edge2.end.elements[1]) / (edge2.start.elements[0] - edge2.end.elements[0]);
@@ -372,7 +364,7 @@ function transformScene(matrix)
 {
     for (let i = 0; i < objects.length; i++) 
     {
-        objects[i].updateTransformation(matrix);
+        objects[i].setTransformation(matrix);
         objects[i].setProgress(animFrames);
     }
     drawScene()
